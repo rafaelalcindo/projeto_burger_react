@@ -8,6 +8,8 @@ import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import Spinner  from '../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import axios from '../../axios-orders';
+import firebase from "firebase";
+
 
 const INGREDIENT_PRICES = {
     salad: 0.5,
@@ -21,19 +23,42 @@ class BurgerBuilder extends Component {
     //     super(props);
     //     this.state = {...}
     // }
+    config = undefined;
+    constructor() {
+        super();
+        this.config = {
+            apiKey: "AIzaSyBqqmsbl7_nPQgrdSCXmLPv4dOZyg5kXm8",
+            authDomain: "react-my-burger-bd745.firebaseapp.com",
+            databaseURL: "https://react-my-burger-bd745.firebaseio.com",
+            projectId: "react-my-burger-bd745",
+            storageBucket: "react-my-burger-bd745.appspot.com",
+            messagingSenderId: "509932533810"
+          };
+        
+    }   
+
     state = {
         ingredients: null,
         totalPrice: 4,
         purchasable: false,
         purchasing: false,
-        loading: false
+        loading: false,
+        error: false
     }
 
     componentDidMount () {
-        axios.get('/ingredients')
-            .then(response => {
-                this.setState({ingredients: response.data});
+        // axios.get('https://react-my-burger-bd745.firebaseio.com/ingredients')
+        //     .then(response => {
+        //         this.setState({ingredients: response.data});
+        //     })
+              //.catch(error => { this.setState({ error: true }) });
+        firebase.initializeApp(this.config);
+        firebase.database().ref('/ingredients').once('value')
+            .then(resposta => {
+                console.log('Resposta Server: ', resposta.val());    
+                this.setState({ingredients: resposta.val()});
             })
+            .catch( () => this.setState({ error: true }) );
     }
 
     updatePurchaseState (ingredients) {
@@ -120,7 +145,7 @@ class BurgerBuilder extends Component {
         }
 
         let orderSummary = null;
-        let burger = <Spinner />
+        let burger = this.state.error ? <p>Ingredients can´t be loaded!</p> : <Spinner />
 
         if(this.state.ingredients) {
             burger = (
