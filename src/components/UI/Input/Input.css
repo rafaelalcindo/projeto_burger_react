@@ -11,7 +11,7 @@
 }
 
 .InputElement {
-    
+    outline: none;
     border: 1px solid #ccc;
     background-color: white;
     font: inherit;
@@ -22,7 +22,7 @@
 }
 
 .InputElement:focus {
-    
+    outline: none;
     background-color: #ccc;
 }
 
